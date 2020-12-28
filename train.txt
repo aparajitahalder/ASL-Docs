@@ -1,0 +1,165 @@
+TRAINING THE MODEL
+
+CREATE CNN MODEL
+Create Neural network sequential architecture
+Add Layers (convolution, normalization, maxpooling) twice
+Flatten the model and feed it to NN
+Add Output layer 
+
+COMPILE THE MODEL
+optimizer
+loss function
+metrics
+
+PREPROCESS AND DATA AUGMENTAION
+#ImageDataGenerator
+rescale 0-255 to 0-1
+shear range
+zoom
+horizontal flip
+#train_datagen.flow_from_directory
+Generator generating augmenting images
+resize image
+color_mode (gray scale)
+class_mode (categorical)
+
+TRAIN AND SAVETHE MODEL
+classifier.fit_generator
+
+loss : during training
+val_loss : loss in validation
+acc : during training
+val_acc : accuracy in validation
+
+#LIBRARIES
+from keras.models import sequential
+from keras.layers import convolution2D, MaxPooling2D, Flatten, Dense
+
+classifier=sequential()
+# Sequential is a stack of layers.
+# Each layer has one input and output tensor.
+# Before adding any layer we need to define our architecture first.
+
+
+classifier.add(Convolution2D(32, (3, 3), input_shape=(64, 64, 1), activation='relu'))
+classifier.add(MaxPooling2D(pool_size=(2, 2)))
+classifier.add(Convolution2D(32, (3, 3), activation='relu'))
+classifier.add(MaxPooling2D(pool_size=(2, 2)))
+
+# We added a convolution layer of 32 filters each of size 3*3. 
+# The input shape is 64*64  having 1 as channel (1-gray 3-rgb)
+# The activation function relu is added here only so that we don't have to add normalization layer
+# Then a maxpooling layer of 2*2 size was added.
+# We again perform convolution and maxpooling in our architecture
+
+
+ 
+classifier.add(Flatten())
+# Then we flattened our model into a neural network
+
+classifier.add(Dense(units=128, activation='relu'))
+# Dense is a neural network
+# Next layer of NN has 128 nodes
+# Relu converts negative value to zero.
+
+classifier.add(Dense(units=30, activation='softmax')) 
+# The ouput layer has 30 nodes as it has 30 classes.
+# Ouput layer grnerally uses softmax function as it is used for multiclass.
+# Softmax transforms value between 0 and 1 so that they can be expressed as probablities.
+
+
+classifier.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy']) 
+# Then we compile our model
+# Optimizer ()-adam, replacement for stochastic gradient descent
+# loss function (calculates error in prediction) - categorical_crossentropy 
+# calculates probablity difference between categories
+# metrics (judges the performance of model)- accuracy
+# Loss function is used while training the model but result of metrics is not
+
+
+
+
+from keras.preprocessing.image import ImageDataGenerator
+
+train_datagen = ImageDataGenerator(
+        rescale=1./255,
+        shear_range=0.2,
+        zoom_range=0.2,
+        horizontal_flip=True)
+
+test_datagen = ImageDataGenerator(rescale=1./255)
+
+# Data Preprocessing and Augmentation
+# Keras Image Data Generator helps in augmenting images even when model is training
+# rescale - original image is between 0-255. But this is too high to process. 
+# Therefore, we scale it between 0 to 1.
+# horizontal flip flips the half images horizontally.
+# shear range distorts the image along axis. 
+
+
+
+training_set = train_datagen.flow_from_directory('C:\\Users\\Hp\\ASL Minor Project\\alphabets\\train',
+                                                 target_size=(64, 64),
+                                                 batch_size=5,
+                                                 color_mode='grayscale',
+                                                 class_mode='categorical')
+
+test_set = test_datagen.flow_from_directory('C:\\Users\\Hp\\ASL Minor Project\\alphabets\\test',
+                                            target_size=(64, 64),
+                                            batch_size=5,
+                                            color_mode='grayscale',
+                                            class_mode='categorical') 
+# This is a generator which generates batches of augment images.
+# All images resize to 64*64
+# color_mode - gray scale
+# class_mode - categorical (sice multiple classes) 
+
+
+
+
+classifier.fit_generator(
+        training_set,
+        steps_per_epoch=22500, 
+        epochs=25,
+        validation_data=test_set,
+        validation_steps=7500)
+# Using the generators to train the model
+# training images - 22500
+# test images - 7500
+
+
+
+# Saving the model 
+model_json = classifier.to_json()
+with open("model-bw.json", "w") as json_file:
+    json_file.write(model_json)
+classifier.save_weights('model-bw.h5')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

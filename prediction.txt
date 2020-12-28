@@ -1,0 +1,10 @@
+Load Model
+Open Webcamera
+Create dictionary represting each gesture
+
+Extract ROI
+Gray conversion
+Apply binary threshold
+result=loaded_model.predict()
+
+Predict 
